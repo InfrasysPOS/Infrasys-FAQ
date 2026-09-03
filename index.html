@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Infrasys POS · 商户自助问答</title>
+<style>
+:root{
+  color-scheme: dark;
+
+  /* ===== 字体（品牌视觉规范 v4）===== */
+  --font-sans:"DengXian","等线","PingFang SC","Microsoft YaHei",
+              "HarmonyOS Sans SC","Helvetica Neue",Arial,sans-serif;
+
+  /* ===== 主背景层级 ===== */
+  --bg-base:    #2D2C69;
+  --bg-elev-1:  #313785;
+  --bg-elev-2:  #3D3276;
+  --bg-hero:    linear-gradient(135deg,#2D2C69 0%,#7645A1 50%,#D56E6F 100%);
+
+  /* ===== 文字层级 ===== */
+  --text-primary:   #FFFFFF;
+  --text-secondary: #D5ECFF;
+  --text-muted:     rgba(255,255,255,.60);
+
+  /* ===== 强调色 ===== */
+  --accent-mint:   #0AFFAB;
+  --accent-purple: #7645A7;
+  --accent-blue:   #60A5FA;
+  --warn:          #D56E6F;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --gap: 20px;
+  --shadow: 0 6px 24px rgba(0,0,0,.28);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-sans);
+  background:var(--bg-base);
+  color:var(--text-primary);
+  font-size:16px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent-mint);text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+
+/* ===================== Hero ===================== */
+.hero{
+  background:var(--bg-hero);
+  padding:64px 24px 76px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::after{
+  content:"";
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.14),transparent 60%);
+  pointer-events:none;
+}
+.hero-inner{max-width:920px;margin:0 auto;position:relative;z-index:1;text-align:center;}
+.brand-mark{
+  display:inline-block;
+  font-size:13px;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(255,255,255,.85);
+  border:1px solid rgba(255,255,255,.35);
+  border-radius:999px;
+  padding:5px 16px;
+  margin-bottom:22px;
+}
+.hero h1{
+  margin:0 0 12px;
+  font-size:clamp(30px,5vw,46px);
+  font-weight:700;
+  letter-spacing:-.01em;
+  line-height:1.25;
+}
+.hero .sub{margin:0 0 32px;color:rgba(255,255,255,.9);font-size:16px;}
+.hero .sub b{color:var(--accent-mint);font-weight:700;}
+
+/* ===================== 搜索框 ===================== */
+.search-wrap{position:relative;max-width:660px;margin:0 auto;}
+.search-box{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.14);
+  border:1.5px solid rgba(255,255,255,.32);
+  border-radius:999px;
+  padding:6px 8px 6px 20px;
+  transition:border-color .18s,box-shadow .18s,background .18s;
+}
+.search-box:focus-within{
+  border-color:var(--accent-mint);
+  background:rgba(255,255,255,.2);
+  box-shadow:0 0 0 4px rgba(10,255,171,.18);
+}
+.search-box svg{flex:0 0 auto;opacity:.85;}
+#q{
+  flex:1;min-width:0;
+  background:transparent;border:0;outline:0;
+  color:#fff;font-size:17px;font-family:inherit;
+  padding:12px 0;
+}
+#q::placeholder{color:rgba(255,255,255,.62);}
+#q::-webkit-search-cancel-button{filter:invert(1) opacity(.6);}
+.btn-clear{
+  flex:0 0 auto;
+  background:rgba(255,255,255,.2);border:0;border-radius:999px;
+  color:#fff;font-size:13px;padding:8px 16px;
+  opacity:0;pointer-events:none;transition:opacity .15s;
+}
+.btn-clear.show{opacity:1;pointer-events:auto;}
+.btn-clear:hover{background:rgba(255,255,255,.32);}
+
+.hot-tags{
+  margin-top:18px;
+  font-size:13.5px;color:rgba(255,255,255,.82);
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;
+}
+.hot-tags button{
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.26);
+  color:#fff;border-radius:999px;
+  padding:5px 13px;font-size:13px;
+  transition:background .15s,border-color .15s;
+}
+.hot-tags button:hover{background:rgba(10,255,171,.22);border-color:var(--accent-mint);}
+
+/* ===================== 主体 ===================== */
+main{max-width:920px;margin:0 auto;padding:0 24px 72px;}
+.section-head{
+  display:flex;align-items:baseline;gap:12px;
+  margin:48px 0 20px;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,.14);
+}
+.section-head h2{margin:0;font-size:22px;font-weight:600;letter-spacing:.01em;}
+.section-head .note{font-size:13px;color:var(--text-muted);}
+.section-head .rule{
+  width:4px;height:20px;border-radius:2px;background:var(--accent-mint);
+  align-self:center;flex:0 0 auto;
+}
+
+/* ===================== 高频问题 ===================== */
+.hot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px;}
+.hot-item{
+  background:var(--bg-elev-1);
+  border:1px solid rgba(255,255,255,.08);
+  border-left:3px solid transparent;
+  border-radius:var(--radius-sm);
+  padding:15px 17px;
+  text-align:left;
+  color:var(--text-primary);
+  font-size:15px;font-weight:500;line-height:1.55;
+  transition:transform .16s,background .16s,border-color .16s;
+}
+.hot-item:hover{
+  background:var(--bg-elev-2);
+  border-left-color:var(--accent-mint);
+  transform:translateY(-2px);
+}
+.hot-item .rank{
+  display:inline-block;min-width:22px;
+  color:var(--accent-mint);font-weight:700;font-size:13px;
+  margin-right:8px;opacity:.9;
+}
+
+/* ===================== 问答卡片 ===================== */
+.qa-list{display:flex;flex-direction:column;gap:10px;}
+.qa-item{
+  background:var(--bg-elev-1);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  overflow:hidden;
+  transition:background .16s,border-color .16s;
+}
+.qa-item:hover{background:var(--bg-elev-2);}
+.qa-item.open{border-color:rgba(10,255,171,.45);background:var(--bg-elev-2);}
+.qa-q{
+  width:100%;display:flex;align-items:flex-start;gap:14px;
+  background:transparent;border:0;
+  color:var(--text-primary);
+  text-align:left;
+  padding:16px 20px;
+  font-size:16px;font-weight:500;line-height:1.6;
+}
+.qa-q .idx{
+  flex:0 0 auto;
+  font-size:12px;font-weight:600;
+  color:var(--text-muted);
+  padding-top:4px;min-width:26px;
+  font-variant-numeric:tabular-nums;
+}
+.qa-q .txt{flex:1;}
+.qa-q .arrow{
+  flex:0 0 auto;
+  color:var(--accent-mint);
+  transition:transform .22s;
+  margin-top:4px;
+}
+.qa-item.open .qa-q .arrow{transform:rotate(180deg);}
+.qa-a{
+  display:none;
+  padding:0 20px 20px;
+  border-top:1px solid rgba(255,255,255,.1);
+}
+.qa-item.open .qa-a{display:block;}
+.answer{
+  margin:16px 0 0;
+  color:var(--text-secondary);
+  font-size:15.5px;line-height:1.85;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.qa-meta{
+  margin-top:16px;padding-top:12px;
+  border-top:1px dashed rgba(255,255,255,.14);
+  font-size:12.5px;color:var(--text-muted);
+  display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;
+}
+.tag{
+  display:inline-block;
+  background:rgba(118,69,167,.42);
+  border:1px solid rgba(212,188,245,.4);
+  color:#D9BCF5;
+  border-radius:6px;padding:2px 9px;font-size:12px;
+}
+.qa-figure{margin:16px 0 0;}
+.qa-figure img{
+  max-width:100%;height:auto;display:block;
+  border-radius:var(--radius-sm);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:var(--shadow);
+}
+
+/* ===================== 结果区 ===================== */
+#resultHead{
+  margin:36px 0 16px;font-size:14px;color:var(--text-secondary);
+}
+#resultHead b{color:var(--accent-mint);}
+.empty{
+  text-align:center;padding:56px 24px;
+  background:var(--bg-elev-1);border-radius:var(--radius);
+  border:1px solid rgba(255,255,255,.08);
+}
+.empty .big{font-size:38px;margin-bottom:10px;opacity:.55;}
+.empty p{margin:6px 0;color:var(--text-secondary);}
+.empty .hint{font-size:13.5px;color:var(--text-muted);}
+
+.btn-more{
+  display:block;width:100%;margin-top:18px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);
+  color:var(--text-primary);
+  border-radius:var(--radius-sm);
+  padding:13px;font-size:15px;
+  transition:background .16s,border-color .16s;
+}
+.btn-more:hover{background:rgba(10,255,171,.16);border-color:var(--accent-mint);}
+
+/* ===================== 页脚 ===================== */
+footer{
+  border-top:1px solid rgba(255,255,255,.14);
+  padding:36px 24px 48px;text-align:center;
+  background:rgba(0,0,0,.16);
+}
+footer .lead{color:var(--text-secondary);font-size:15px;margin:0 0 8px;}
+footer .tel{
+  font-size:26px;font-weight:700;
+  color:var(--accent-mint);
+  letter-spacing:.04em;
+  font-variant-numeric:tabular-nums;
+}
+footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
+
+/* ===================== 响应式 ===================== */
+@media (max-width:640px){
+  .hero{padding:44px 18px 56px;}
+  main{padding:0 16px 56px;}
+  .hot-grid{grid-template-columns:1fr;}
+  .qa-q{padding:14px 16px;font-size:15px;}
+  .qa-a{padding:0 16px 16px;}
+  footer .tel{font-size:22px;}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="brand-mark">Infrasys POS</span>
+    <h1>遇到问题，先问这里</h1>
+    <p class="sub">已收录 <b id="totalNum">—</b> 条常见问题，输入关键词即可查找答案</p>
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path>
+        </svg>
+        <input id="q" type="search" autocomplete="off"
+               placeholder="例如：报表无法运行、结账错误、授权失败…"
+               aria-label="搜索常见问题">
+        <button id="btnClear" class="btn-clear" type="button">清空</button>
+      </div>
+    </div>
+
+    <div class="hot-tags" id="hotTags">
+      <span>大家都在搜：</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- 高频问题 -->
+  <section id="secHot">
+    <div class="section-head">
+      <span class="rule"></span>
+      <h2>商户最常问</h2>
+      <span class="note">按历史提问频次排序</span>
+    </div>
+    <div class="hot-grid" id="hotGrid"></div>
+  </section>
+
+  <!-- 搜索结果 -->
+  <section id="secResult" hidden>
+    <div id="resultHead"></div>
+    <div class="qa-list" id="resultList"></div>
+  </section>
+
+  <!-- 全部问答 -->
+  <section id="secAll">
+    <div class="section-head">
+      <span class="rule"></span>
+      <h2>全部问答</h2>
+      <span class="note" id="allNote"></span>
+    </div>
+    <div class="qa-list" id="allList"></div>
+    <button class="btn-more" id="btnMore" type="button">显示更多</button>
+  </section>
+</main>
+
+<footer>
+  <p class="lead">没有找到答案？请联系客服热线</p>
+  <div class="tel">4008 200 188</div>
+  <p class="fine" id="footNote"></p>
+</footer>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var DATA = (typeof FAQ_DATA !== "undefined") ? FAQ_DATA : [];
+  var META = (typeof FAQ_META !== "undefined") ? FAQ_META : {total:DATA.length};
+
+  /* ---------- 文本归一化：去空白、去标点、全角转半角、转小写 ---------- */
+  var PUNCT = /[\s\u3000\u3001-\u303F\uFF01-\uFF65,.!?;:'"()\[\]{}<>\/\\|~`@#$%^&*_+=-]/g;
+  function norm(s){
+    return String(s == null ? "" : s)
+      .toLowerCase()
+      .replace(/[！-～]/g, function(c){
+        return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+      })
+      .replace(PUNCT, "");
+  }
+
+  /* ---------- 2-gram 集合 ---------- */
+  function grams(s){
+    var set = Object.create(null), n = 0;
+    if (s.length < 2){ if (s) { set[s] = 1; n = 1; } return {set:set, n:n}; }
+    for (var i = 0; i < s.length - 1; i++){
+      var g = s.substr(i, 2);
+      if (!set[g]){ set[g] = 1; n++; }
+    }
+    return {set:set, n:n};
+  }
+  /* Dice 系数：衡量两段文本的字符重合度 */
+  function dice(a, b){
+    if (!a || !b) return 0;
+    var A = grams(a), B = grams(b);
+    if (!A.n || !B.n) return 0;
+    var inter = 0;
+    for (var g in A.set){ if (B.set[g]) inter++; }
+    return 2 * inter / (A.n + B.n);
+  }
+
+  /* ---------- 单条文本与查询词的相似度 0~1 ---------- */
+  function sim(text, nq){
+    if (!nq || !text) return 0;
+    if (text === nq) return 1;
+    var at = text.indexOf(nq);
+    if (at >= 0){
+      // 越靠前、占比越高，得分越高
+      var cover = nq.length / text.length;
+      return 0.74 + 0.18 * cover + (at === 0 ? 0.05 : 0);
+    }
+    return dice(text, nq) * 0.68;
+  }
+
+  /* ---------- 一条问答对某个查询词的得分 ---------- */
+  function scoreRecord(rec, nq){
+    if (!nq) return 0;
+    var best = sim(norm(rec.q), nq);
+    var kws = rec.kw || [];
+    for (var i = 0; i < kws.length; i++){
+      var s = sim(norm(kws[i]), nq) * 0.94;
+      if (s > best) best = s;
+    }
+    var A = norm(rec.a);
+    if (A.indexOf(nq) >= 0) best += 0.10;   // 答案命中作为补充
+    return best;
+  }
+
+  var THRESHOLD = 0.16;
+
+  function sortHits(out){
+    out.sort(function(a, b){
+      if (b.score !== a.score) return b.score - a.score;
+      return (b.rec.heat || 0) - (a.rec.heat || 0);   // 同分比热度
+    });
+    return out;
+  }
+
+  /* ---------- 主搜索：多关键词取交集（AND），结果为空时降级为并集（OR） ---------- */
+  function search(raw){
+    var terms = String(raw || "").trim().split(/[\s\u3000]+/).map(norm).filter(Boolean);
+    if (!terms.length) return [];
+
+    var out = [];
+    for (var i = 0; i < DATA.length; i++){
+      var rec = DATA[i], sum = 0, min = 1, ok = true;
+      for (var t = 0; t < terms.length; t++){
+        var s = scoreRecord(rec, terms[t]);
+        if (s < THRESHOLD){ ok = false; break; }
+        sum += s;
+        if (s < min) min = s;
+      }
+      if (!ok) continue;
+      var avg = sum / terms.length;
+      out.push({ rec: rec, score: avg * 0.78 + min * 0.22 });
+    }
+    if (out.length > 0 || terms.length < 2) return sortHits(out);
+
+    /* 多个词分别命中不同条目（例如「结账 分账」），退化为任一词命中即可 */
+    var or = [];
+    for (var j = 0; j < DATA.length; j++){
+      var r2 = DATA[j], hit = 0, maxs = 0, s2 = 0;
+      for (var k = 0; k < terms.length; k++){
+        var v = scoreRecord(r2, terms[k]);
+        if (v >= THRESHOLD){ hit++; s2 += v; }
+        if (v > maxs) maxs = v;
+      }
+      if (!hit) continue;
+      or.push({
+        rec: r2,
+        score: maxs * 0.55 + (hit / terms.length) * 0.30 + (s2 / terms.length) * 0.15
+      });
+    }
+    return sortHits(or);
+  }
+
+  /* ---------- 高亮 ---------- */
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+  /* ---------- 构建问答卡片 ---------- */
+  var openIds = Object.create(null);
+
+  function buildItem(rec, idx, terms){
+    var el = document.createElement("div");
+    el.className = "qa-item";
+    el.setAttribute("data-id", rec.id);
+
+    var qBtn = document.createElement("button");
+    qBtn.type = "button";
+    qBtn.className = "qa-q";
+    qBtn.setAttribute("aria-expanded", "false");
+    qBtn.innerHTML =
+      '<span class="idx">' + (idx ? idx + "." : "") + '</span>' +
+      '<span class="txt">' + esc(rec.q) + '</span>' +
+      '<span class="arrow" aria-hidden="true">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">' +
+        '<path d="M6 9l6 6 6-6"/></svg></span>';
+    el.appendChild(qBtn);
+
+    var aBox = document.createElement("div");
+    aBox.className = "qa-a";
+
+    var p = document.createElement("div");
+    p.className = "answer";
+    p.textContent = rec.a || "（暂未录入解决方案）";
+    aBox.appendChild(p);
+
+    // 图片：默认显示，加载失败则整块移除（缺图不留空位）
+    if (rec.img){
+      var fig = document.createElement("figure");
+      fig.className = "qa-figure";
+      var img = document.createElement("img");
+      img.loading = "lazy";
+      img.alt = rec.q;
+      img.src = (META.imageDir || "images/") + rec.img;
+      // 同步命中缓存/已加载完成的图片：onload 不会触发，需手动检测
+      if (img.complete && img.naturalWidth > 0){
+        // 已成功加载，无需任何操作
+      } else {
+        img.onload = function(){
+          if (this.naturalWidth === 0){ this.parentNode && this.parentNode.remove(); }
+        };
+        img.onerror = function(){
+          this.parentNode && this.parentNode.remove();
+        };
+      }
+      fig.appendChild(img);
+      aBox.appendChild(fig);
+    }
+
+    var meta = document.createElement("div");
+    meta.className = "qa-meta";
+    if (rec.cat) meta.innerHTML = '<span class="tag">' + esc(rec.cat) + '</span>';
+    var kwN = (rec.kw || []).length;
+    if (kwN) meta.innerHTML += '<span>常见问法 ' + kwN + ' 种</span>';
+    aBox.appendChild(meta);
+
+    el.appendChild(aBox);
+
+    qBtn.addEventListener("click", function(){
+      var open = el.classList.toggle("open");
+      qBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) openIds[rec.id] = 1; else delete openIds[rec.id];
+    });
+
+    if (openIds[rec.id]) el.classList.add("open");
+    return el;
+  }
+
+  function renderInto(container, list, startIdx){
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < list.length; i++){
+      frag.appendChild(buildItem(list[i].rec || list[i], (startIdx || 0) + i + 1, currentTerms));
+    }
+    container.appendChild(frag);
+  }
+
+  /* ---------- 页面元素 ---------- */
+  var $q        = document.getElementById("q");
+  var $clear    = document.getElementById("btnClear");
+  var $hotGrid  = document.getElementById("hotGrid");
+  var $secHot   = document.getElementById("secHot");
+  var $secRes   = document.getElementById("secResult");
+  var $resHead  = document.getElementById("resultHead");
+  var $resList  = document.getElementById("resultList");
+  var $secAll   = document.getElementById("secAll");
+  var $allList  = document.getElementById("allList");
+  var $allNote  = document.getElementById("allNote");
+  var $btnMore  = document.getElementById("btnMore");
+
+  var currentTerms = [];
+  var PAGE = 40, shown = 0, allSorted = null;
+
+  /* ---------- 首屏：统计数字 ---------- */
+  document.getElementById("totalNum").textContent = META.total || DATA.length;
+  document.getElementById("footNote").textContent =
+    "共收录 " + DATA.length + " 条问答" + (META.updated ? "，更新于 " + META.updated : "");
+
+  /* ---------- 高频问题（按热度） ---------- */
+  var hot = DATA.slice().sort(function(a, b){
+    return (b.heat || 0) - (a.heat || 0);
+  }).slice(0, 12);
+
+  (function renderHot(){
+    var frag = document.createDocumentFragment();
+    hot.forEach(function(rec, i){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "hot-item";
+      b.innerHTML = '<span class="rank">' + (i + 1) + '</span>' + esc(rec.q);
+      b.addEventListener("click", function(){
+        $q.value = rec.q;
+        $clear.classList.add("show");
+        runSearch();
+        window.scrollTo({ top: document.querySelector(".hero").offsetHeight - 90, behavior: "smooth" });
+      });
+      frag.appendChild(b);
+    });
+    $hotGrid.appendChild(frag);
+  })();
+
+  /* ---------- 快捷搜索词 ---------- */
+  var QUICK = ["报表", "结账", "授权", "打印", "菜品", "日结"];
+  (function renderQuick(){
+    var box = document.getElementById("hotTags");
+    QUICK.forEach(function(w){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = w;
+      b.addEventListener("click", function(){
+        $q.value = w;
+        $clear.classList.add("show");
+        runSearch();
+        $q.focus();
+      });
+      box.appendChild(b);
+    });
+  })();
+
+  /* ---------- 全部问答（默认按热度排序） ---------- */
+  allSorted = DATA.slice().sort(function(a, b){ return (b.heat || 0) - (a.heat || 0); });
+  $allNote.textContent = "共 " + allSorted.length + " 条";
+
+  function renderMore(){
+    var slice = allSorted.slice(shown, shown + PAGE);
+    renderInto($allList, slice, shown);
+    shown += slice.length;
+    $btnMore.textContent = shown >= allSorted.length
+      ? "已全部显示（" + allSorted.length + " 条）"
+      : "显示更多（还有 " + (allSorted.length - shown) + " 条）";
+    $btnMore.disabled = shown >= allSorted.length;
+    $btnMore.style.opacity = $btnMore.disabled ? ".5" : "";
+  }
+  $btnMore.addEventListener("click", renderMore);
+  renderMore();
+
+  /* ---------- 搜索主流程 ---------- */
+  var timer = null;
+  function runSearch(){
+    var raw = $q.value;
+    currentTerms = String(raw || "").trim().split(/[\s\u3000]+/)
+                    .map(norm).filter(Boolean);
+
+    if (!currentTerms.length){
+      $secRes.hidden = true;
+      $secHot.hidden = false;
+      $secAll.hidden = false;
+      $clear.classList.remove("show");
+      return;
+    }
+    $clear.classList.add("show");
+
+    var hits = search(raw);
+    $secHot.hidden = true;
+    $secAll.hidden = true;
+    $secRes.hidden = false;
+
+    if (!hits.length){
+      $resHead.innerHTML = "";
+      $resList.innerHTML =
+        '<div class="empty">' +
+          '<div class="big">🔍</div>' +
+          '<p>没有找到与「<b style="color:var(--accent-mint)">' + esc(raw) + '</b>」相关的问答</p>' +
+          '<p class="hint">可以换个说法试试，例如只输入核心词「报表」「结账」</p>' +
+          '<p class="hint">或直接拨打客服热线 4008 200 188</p>' +
+        '</div>';
+      return;
+    }
+
+    $resHead.innerHTML = '找到 <b>' + hits.length + '</b> 条相关问答，按匹配度排序：';
+    $resList.innerHTML = "";
+    renderInto($resList, hits.slice(0, 40), 0);
+
+    if (hits.length > 40 || hits.length > 20){
+      var tip = document.createElement("p");
+      tip.style.cssText = "margin-top:16px;font-size:13.5px;color:var(--text-muted);text-align:center";
+      tip.textContent = hits.length > 40
+        ? "仅显示匹配度最高的 40 条，建议补充更具体的关键词缩小范围"
+        : "结果较多，补充更具体的关键词可以更快找到答案";
+      $resList.appendChild(tip);
+    }
+  }
+
+  $q.addEventListener("input", function(){
+    clearTimeout(timer);
+    timer = setTimeout(runSearch, 160);
+  });
+  $clear.addEventListener("click", function(){
+    $q.value = "";
+    currentTerms = [];
+    runSearch();
+    $q.focus();
+  });
+  $q.addEventListener("keydown", function(e){
+    if (e.key === "Escape"){ $q.value = ""; runSearch(); }
+  });
+})();
+</script>
+</body>
+</html>
