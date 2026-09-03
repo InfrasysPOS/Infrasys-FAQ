@@ -147,14 +147,16 @@ main{max-width:920px;margin:0 auto;padding:0 24px 72px;}
 .hot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px;}
 .hot-item{
   background:var(--bg-elev-1);
+  display:flex;align-items:flex-start;gap:10px;
+  text-align:left;
   border:1px solid rgba(255,255,255,.08);
   border-left:3px solid transparent;
   border-radius:var(--radius-sm);
   padding:15px 17px;
-  text-align:left;
   color:var(--text-primary);
   font-size:15px;font-weight:500;line-height:1.55;
   transition:transform .16s,background .16s,border-color .16s;
+  min-height:78px;
 }
 .hot-item:hover{
   background:var(--bg-elev-2);
@@ -162,9 +164,13 @@ main{max-width:920px;margin:0 auto;padding:0 24px 72px;}
   transform:translateY(-2px);
 }
 .hot-item .rank{
-  display:inline-block;min-width:22px;
+  flex:0 0 auto;min-width:22px;
   color:var(--accent-mint);font-weight:700;font-size:13px;
-  margin-right:8px;opacity:.9;
+  opacity:.9;line-height:inherit;
+}
+.hot-txt{
+  flex:1 1 auto;min-width:0;
+  text-align:left;
 }
 
 /* ===================== 问答卡片 ===================== */
@@ -576,7 +582,7 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
       var b = document.createElement("button");
       b.type = "button";
       b.className = "hot-item";
-      b.innerHTML = '<span class="rank">' + (i + 1) + '</span>' + esc(rec.q);
+      b.innerHTML = '<span class="rank">' + (i + 1) + '</span><span class="hot-txt">' + esc(rec.q) + '</span>';
       b.addEventListener("click", function(){
         $q.value = rec.q;
         $clear.classList.add("show");
