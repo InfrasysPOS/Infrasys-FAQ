@@ -290,11 +290,36 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
   .qa-a{padding:0 16px 16px;}
   footer .tel{font-size:22px;}
 }
+
+/* ===================== 语言切换 ===================== */
+.lang-switch{
+  position:absolute;top:18px;right:18px;z-index:3;
+  display:flex;gap:6px;
+  background:rgba(0,0,0,.2);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:999px;padding:4px;
+}
+.lang-switch button{
+  border:0;background:transparent;color:rgba(255,255,255,.82);
+  font-size:13px;padding:5px 12px;border-radius:999px;
+  transition:background .15s,color .15s;line-height:1.2;font-family:inherit;
+}
+.lang-switch button:hover{color:#fff;}
+.lang-switch button.active{background:var(--accent-mint);color:#172454;font-weight:700;}
+@media (max-width:640px){
+  .lang-switch{top:12px;right:12px;}
+  .lang-switch button{padding:4px 9px;font-size:12px;}
+}
 </style>
 </head>
 <body>
 
 <header class="hero">
+  <div class="lang-switch" id="langSwitch">
+    <button type="button" data-lang="zh">简体</button>
+    <button type="button" data-lang="en">English</button>
+    <button type="button" data-lang="hant">繁體</button>
+  </div>
   <div class="hero-inner">
     <span class="brand-mark">Infrasys POS</span>
     <h1>遇到问题，先问这里</h1>
@@ -361,6 +386,104 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
   var DATA = (typeof FAQ_DATA !== "undefined") ? FAQ_DATA : [];
   var META = (typeof FAQ_META !== "undefined") ? FAQ_META : {total:DATA.length};
 
+  /* ===================== 多语言 ===================== */
+  var LANGS = [
+    { code: "zh",   label: "简体" },
+    { code: "en",   label: "English" },
+    { code: "hant", label: "繁體" }
+  ];
+  var I18N = {
+    zh: {
+      title: "Infrasys POS · 商户自助问答", brand: "Infrasys POS",
+      h1: "遇到问题，先问这里",
+      sub: "已收录 {n} 条常见问题，输入关键词即可查找答案",
+      placeholder: "例如：报表无法运行、结账错误、授权失败…",
+      hotLabel: "大家都在搜：", hotTitle: "商户最常问", hotNote: "按历史提问频次排序",
+      allTitle: "全部问答", allNotePre: "共 ", allNoteSuf: " 条",
+      footLead: "没有找到答案？请联系客服热线",
+      footPre: "共收录 ", footMid: " 条问答", footUpd: "，更新于 ",
+      empty1: "没有找到与「{q}」相关的问答",
+      empty2: "可以换个说法试试，例如只输入核心词「报表」「结账」",
+      empty3: "或直接拨打客服热线 4008 200 188",
+      resHead: "找到 {n} 条相关问答，按匹配度排序：",
+      more: "显示更多", moreLeft: "（还有 {n} 条）", moreAll: "已全部显示（{n} 条）",
+      tip40: "仅显示匹配度最高的 40 条，建议补充更具体的关键词缩小范围",
+      tipMany: "结果较多，补充更具体的关键词可以更快找到答案",
+      clear: "清空",
+      quick: ["报表","结账","授权","打印","菜品","日结"],
+      noAns: "（暂未录入解决方案）", updated: "，更新于 "
+    },
+    en: {
+      title: "Infrasys POS · Self-Service FAQ", brand: "Infrasys POS",
+      h1: "Questions? Ask here first",
+      sub: "{n} common questions indexed. Type a keyword to find answers.",
+      placeholder: "e.g. report won't run, checkout error, authorization failed…",
+      hotLabel: "Popular searches: ", hotTitle: "Most Asked", hotNote: "Sorted by historical frequency",
+      allTitle: "All Q&A", allNotePre: "Total ", allNoteSuf: " items",
+      footLead: "Can't find an answer? Contact our support hotline",
+      footPre: "", footMid: " Q&A indexed", footUpd: ", updated ",
+      empty1: "No Q&A found related to “{q}”",
+      empty2: "Try rephrasing, e.g. just the core word “report” or “checkout”",
+      empty3: "Or call our support hotline 4008 200 188",
+      resHead: "Found {n} related Q&A, sorted by relevance:",
+      more: "Show more", moreLeft: " ({n} more)", moreAll: "All shown ({n} items)",
+      tip40: "Only the top 40 most relevant are shown. Add more specific keywords to narrow down.",
+      tipMany: "Many results — more specific keywords help you find answers faster.",
+      clear: "Clear",
+      quick: ["Report","Checkout","Authorize","Print","Menu","Day-close"],
+      noAns: "(No solution recorded yet)", updated: ", updated "
+    },
+    hant: {
+      title: "Infrasys POS · 商戶自助問答", brand: "Infrasys POS",
+      h1: "遇到問題，先問這裡",
+      sub: "已收錄 {n} 條常見問題，輸入關鍵詞即可查找答案",
+      placeholder: "例如：報表無法運行、結帳錯誤、授權失敗…",
+      hotLabel: "大家都在搜：", hotTitle: "商戶最常問", hotNote: "按歷史提問頻次排序",
+      allTitle: "全部問答", allNotePre: "共 ", allNoteSuf: " 條",
+      footLead: "沒有找到答案？請聯繫客服熱線",
+      footPre: "共收錄 ", footMid: " 條問答", footUpd: "，更新於 ",
+      empty1: "沒有找到與「{q}」相關的問答",
+      empty2: "可以換個說法試試，例如只輸入核心詞「報表」「結帳」",
+      empty3: "或直接撥打客服熱線 4008 200 188",
+      resHead: "找到 {n} 條相關問答，按匹配度排序：",
+      more: "顯示更多", moreLeft: "（還有 {n} 條）", moreAll: "已全部顯示（{n} 條）",
+      tip40: "僅顯示匹配度最高的 40 條，建議補充更具體的關鍵詞縮小範圍",
+      tipMany: "結果較多，補充更具體的關鍵詞可以更快找到答案",
+      clear: "清空",
+      quick: ["報表","結帳","授權","列印","菜品","日結"],
+      noAns: "（暫未錄入解決方案）", updated: "，更新於 "
+    }
+  };
+
+  // 语言：优先读取用户选择；否则按系统语言自动判断
+  // （zh-HK / zh-TW / zh-MO / zh-Hant → 繁體；en* → 英文；其余 → 简体）
+  var LANG = (function(){
+    var saved = null;
+    try { saved = localStorage.getItem("faq_lang"); } catch (e) {}
+    if (saved && I18N[saved]) return saved;
+    var n = (navigator.language || navigator.userLanguage || "zh").toLowerCase();
+    if (n.indexOf("zh") === 0) return (/hk|tw|mo|hant/).test(n) ? "hant" : "zh";
+    if (n.indexOf("en") === 0) return "en";
+    return "zh";
+  })();
+
+  function T(key){ return (I18N[LANG] && I18N[LANG][key] != null) ? I18N[LANG][key] : (I18N.zh[key] || ""); }
+  function Tn(key, n){ return String(T(key)).replace("{n}", n); }
+  function Tq(key, q){ return String(T(key)).replace("{q}", q); }
+
+  // 双形态兼容：扁平串直接返回；语言地图取当前语言，缺译回退 zh
+  function langText(field){
+    if (field == null) return "";
+    if (typeof field === "string") return field;
+    return (field[LANG] != null && field[LANG] !== "") ? field[LANG] : (field.zh || "");
+  }
+  function langArr(field){
+    if (field == null) return [];
+    if (Array.isArray(field)) return field;
+    var v = (field[LANG] != null && field[LANG].length) ? field[LANG] : (field.zh || []);
+    return v || [];
+  }
+
   /* ---------- 文本归一化：去空白、去标点、全角转半角、转小写 ---------- */
   var PUNCT = /[\s\u3000\u3001-\u303F\uFF01-\uFF65,.!?;:'"()\[\]{}<>\/\\|~`@#$%^&*_+=-]/g;
   function norm(s){
@@ -408,13 +531,13 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
   /* ---------- 一条问答对某个查询词的得分 ---------- */
   function scoreRecord(rec, nq){
     if (!nq) return 0;
-    var best = sim(norm(rec.q), nq);
-    var kws = rec.kw || [];
+    var best = sim(norm(langText(rec.q)), nq);
+    var kws = langArr(rec.kw);
     for (var i = 0; i < kws.length; i++){
       var s = sim(norm(kws[i]), nq) * 0.94;
       if (s > best) best = s;
     }
-    var A = norm(rec.a);
+    var A = norm(langText(rec.a));
     if (A.indexOf(nq) >= 0) best += 0.10;   // 答案命中作为补充
     return best;
   }
@@ -486,7 +609,7 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
     qBtn.setAttribute("aria-expanded", "false");
     qBtn.innerHTML =
       '<span class="idx">' + (idx ? idx + "." : "") + '</span>' +
-      '<span class="txt">' + esc(rec.q) + '</span>' +
+      '<span class="txt">' + esc(langText(rec.q)) + '</span>' +
       '<span class="arrow" aria-hidden="true">' +
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">' +
         '<path d="M6 9l6 6 6-6"/></svg></span>';
@@ -497,7 +620,7 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
 
     var p = document.createElement("div");
     p.className = "answer";
-    p.textContent = rec.a || "（暂未录入解决方案）";
+    p.textContent = langText(rec.a) || T("noAns");
     aBox.appendChild(p);
 
     // 图片：默认显示，加载失败则整块移除（缺图不留空位）
@@ -506,7 +629,7 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
       fig.className = "qa-figure";
       var img = document.createElement("img");
       img.loading = "lazy";
-      img.alt = rec.q;
+      img.alt = langText(rec.q);
       img.src = (META.imageDir || "images/") + rec.img;
       // 同步命中缓存/已加载完成的图片：onload 不会触发，需手动检测
       if (img.complete && img.naturalWidth > 0){
@@ -525,7 +648,7 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
 
     var meta = document.createElement("div");
     meta.className = "qa-meta";
-    if (rec.cat) meta.innerHTML = '<span class="tag">' + esc(rec.cat) + '</span>';
+    if (langText(rec.cat)) meta.innerHTML = '<span class="tag">' + esc(langText(rec.cat)) + '</span>';
     var kwN = (rec.kw || []).length;
     if (kwN) meta.innerHTML += '<span>常见问法 ' + kwN + ' 种</span>';
     aBox.appendChild(meta);
@@ -562,29 +685,35 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
   var $allList  = document.getElementById("allList");
   var $allNote  = document.getElementById("allNote");
   var $btnMore  = document.getElementById("btnMore");
+  var $brand    = document.querySelector(".brand-mark");
+  var $h1       = document.querySelector(".hero h1");
+  var $sub      = document.querySelector(".hero .sub");
+  var $hotTitle = document.querySelector("#secHot .section-head h2");
+  var $hotNote  = document.querySelector("#secHot .section-head .note");
+  var $allTitle = document.querySelector("#secAll .section-head h2");
+  var $footLead = document.querySelector("footer .lead");
+  var $footNote = document.getElementById("footNote");
+  var $langSwitch = document.getElementById("langSwitch");
 
   var currentTerms = [];
   var PAGE = 40, shown = 0, allSorted = null;
 
-  /* ---------- 首屏：统计数字 ---------- */
-  document.getElementById("totalNum").textContent = META.total || DATA.length;
-  document.getElementById("footNote").textContent =
-    "共收录 " + DATA.length + " 条问答" + (META.updated ? "，更新于 " + META.updated : "");
+  /* ---------- 首屏：统计数字（语言相关文案在 applyLang 中设置） ---------- */
 
   /* ---------- 高频问题（按热度） ---------- */
   var hot = DATA.slice().sort(function(a, b){
     return (b.heat || 0) - (a.heat || 0);
   }).slice(0, 12);
 
-  (function renderHot(){
+  function renderHot(){
     var frag = document.createDocumentFragment();
     hot.forEach(function(rec, i){
       var b = document.createElement("button");
       b.type = "button";
       b.className = "hot-item";
-      b.innerHTML = '<span class="rank">' + (i + 1) + '</span><span class="hot-txt">' + esc(rec.q) + '</span>';
+      b.innerHTML = '<span class="rank">' + (i + 1) + '</span><span class="hot-txt">' + esc(langText(rec.q)) + '</span>';
       b.addEventListener("click", function(){
-        $q.value = rec.q;
+        $q.value = langText(rec.q);
         $clear.classList.add("show");
         runSearch();
         window.scrollTo({ top: document.querySelector(".hero").offsetHeight - 90, behavior: "smooth" });
@@ -592,13 +721,13 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
       frag.appendChild(b);
     });
     $hotGrid.appendChild(frag);
-  })();
+  }
 
   /* ---------- 快捷搜索词 ---------- */
-  var QUICK = ["报表", "结账", "授权", "打印", "菜品", "日结"];
-  (function renderQuick(){
+  function renderQuick(){
     var box = document.getElementById("hotTags");
-    QUICK.forEach(function(w){
+    box.innerHTML = '<span>' + T("hotLabel") + '</span>';
+    T("quick").forEach(function(w){
       var b = document.createElement("button");
       b.type = "button";
       b.textContent = w;
@@ -610,24 +739,23 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
       });
       box.appendChild(b);
     });
-  })();
+  }
 
   /* ---------- 全部问答（默认按热度排序） ---------- */
   allSorted = DATA.slice().sort(function(a, b){ return (b.heat || 0) - (a.heat || 0); });
-  $allNote.textContent = "共 " + allSorted.length + " 条";
+  // $allNote 文案在 applyLang 中按语言设置
 
   function renderMore(){
     var slice = allSorted.slice(shown, shown + PAGE);
     renderInto($allList, slice, shown);
     shown += slice.length;
     $btnMore.textContent = shown >= allSorted.length
-      ? "已全部显示（" + allSorted.length + " 条）"
-      : "显示更多（还有 " + (allSorted.length - shown) + " 条）";
+      ? Tn("moreAll", allSorted.length)
+      : T("more") + Tn("moreLeft", allSorted.length - shown);
     $btnMore.disabled = shown >= allSorted.length;
     $btnMore.style.opacity = $btnMore.disabled ? ".5" : "";
   }
   $btnMore.addEventListener("click", renderMore);
-  renderMore();
 
   /* ---------- 搜索主流程 ---------- */
   var timer = null;
@@ -655,14 +783,14 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
       $resList.innerHTML =
         '<div class="empty">' +
           '<div class="big">🔍</div>' +
-          '<p>没有找到与「<b style="color:var(--accent-mint)">' + esc(raw) + '</b>」相关的问答</p>' +
-          '<p class="hint">可以换个说法试试，例如只输入核心词「报表」「结账」</p>' +
-          '<p class="hint">或直接拨打客服热线 4008 200 188</p>' +
+          '<p>' + Tq("empty1", '<b style="color:var(--accent-mint)">' + esc(raw) + '</b>') + '</p>' +
+          '<p class="hint">' + T("empty2") + '</p>' +
+          '<p class="hint">' + T("empty3") + '</p>' +
         '</div>';
       return;
     }
 
-    $resHead.innerHTML = '找到 <b>' + hits.length + '</b> 条相关问答，按匹配度排序：';
+    $resHead.innerHTML = Tn("resHead", '<b>' + hits.length + '</b>');
     $resList.innerHTML = "";
     renderInto($resList, hits.slice(0, 40), 0);
 
@@ -670,8 +798,8 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
       var tip = document.createElement("p");
       tip.style.cssText = "margin-top:16px;font-size:13.5px;color:var(--text-muted);text-align:center";
       tip.textContent = hits.length > 40
-        ? "仅显示匹配度最高的 40 条，建议补充更具体的关键词缩小范围"
-        : "结果较多，补充更具体的关键词可以更快找到答案";
+        ? T("tip40")
+        : T("tipMany");
       $resList.appendChild(tip);
     }
   }
@@ -689,6 +817,56 @@ footer .fine{margin-top:14px;font-size:12.5px;color:var(--text-muted);}
   $q.addEventListener("keydown", function(e){
     if (e.key === "Escape"){ $q.value = ""; runSearch(); }
   });
+
+  /* ---------- 语言切换：重渲染整页（保留已展开项） ---------- */
+  function applyLang(){
+    document.documentElement.lang = (LANG === "en") ? "en" : (LANG === "hant" ? "zh-Hant" : "zh-CN");
+    document.title = T("title");
+    if ($brand)    $brand.textContent = T("brand");
+    if ($h1)       $h1.textContent = T("h1");
+    if ($sub)      $sub.innerHTML = Tn("sub", '<b id="totalNum">' + (META.total || DATA.length) + '</b>');
+    if ($q)        $q.placeholder = T("placeholder");
+    if ($clear)    $clear.textContent = T("clear");
+    if ($hotTitle) $hotTitle.textContent = T("hotTitle");
+    if ($hotNote)  $hotNote.textContent = T("hotNote");
+    if ($allTitle) $allTitle.textContent = T("allTitle");
+    if ($footLead) $footLead.textContent = T("footLead");
+    if ($footNote) $footNote.textContent = T("footPre") + DATA.length + T("footMid") + (META.updated ? T("footUpd") + META.updated : "");
+
+    // 切换按钮高亮
+    if ($langSwitch){
+      var swBtns = $langSwitch.querySelectorAll("button");
+      for (var sbi = 0; sbi < swBtns.length; sbi++){
+        swBtns[sbi].classList.toggle("active", swBtns[sbi].getAttribute("data-lang") === LANG);
+      }
+    }
+
+    // 重渲染动态列表（保留 openIds 展开状态）
+    if ($hotGrid){ $hotGrid.innerHTML = ""; renderHot(); }
+    renderQuick();
+    shown = 0;
+    if ($allList){ $allList.innerHTML = ""; }
+    if ($allNote) $allNote.textContent = T("allNotePre") + allSorted.length + T("allNoteSuf");
+    renderMore();
+
+    // 若正在搜索，用新语言重算结果
+    if (currentTerms.length){ runSearch(); }
+  }
+
+  if ($langSwitch){
+    var lsBtns = $langSwitch.querySelectorAll("button");
+    for (var lsi = 0; lsi < lsBtns.length; lsi++){
+      (function(btn){
+        btn.addEventListener("click", function(){
+          LANG = btn.getAttribute("data-lang");
+          try { localStorage.setItem("faq_lang", LANG); } catch (e) {}
+          applyLang();
+        });
+      })(lsBtns[lsi]);
+    }
+  }
+
+  applyLang();
 })();
 </script>
 </body>
